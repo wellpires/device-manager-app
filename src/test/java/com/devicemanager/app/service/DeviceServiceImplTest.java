@@ -2,13 +2,14 @@ package com.devicemanager.app.service;
 
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.entity.DeviceEntity;
+import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.repository.DeviceRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,11 +19,15 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,4 +74,34 @@ class DeviceServiceImplTest {
         assertThat(pageDeviceDTOs.getTotalElements(), equalTo(10L));
 
     }
+
+    @Test
+    void shouldFindOneDevice() {
+
+        DeviceEntity deviceEntity = DeviceEntity.builder()
+                .id(UUID.randomUUID())
+                .name(RandomStringUtils.secure().nextAlphanumeric(10))
+                .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .build();
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
+
+        DeviceDTO deviceDTO = deviceService.find(UUID.randomUUID());
+
+        assertThat(deviceDTO, notNullValue());
+        assertThat(deviceDTO.id(), equalTo(deviceEntity.getId()));
+        assertThat(deviceDTO.name(), equalTo(deviceEntity.getName()));
+        assertThat(deviceDTO.brand(), equalTo(deviceEntity.getBrand()));
+
+    }
+
+    @Test
+    void shouldNotFindOneDevice() {
+
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThrows(DeviceNotFoundException.class, () -> {
+            deviceService.find(UUID.randomUUID());
+        });
+    }
+
 }
