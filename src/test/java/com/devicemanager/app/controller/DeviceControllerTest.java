@@ -2,6 +2,7 @@ package com.devicemanager.app.controller;
 
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
+import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.service.DeviceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -23,9 +23,9 @@ import java.net.URI;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -37,6 +37,7 @@ class DeviceControllerTest {
     private static final String POST_CREATE_DEVICES = BASE_URL.concat("");
     private static final String GET_DEVICES = BASE_URL.concat("");
     private static final String GET_DEVICE = BASE_URL.concat("/{id}");
+    private static final String DELETE_DEVICE = BASE_URL.concat("/{id}");
 
     @Autowired
     private ObjectMapper mapper;
@@ -139,6 +140,58 @@ class DeviceControllerTest {
         mockMvc.perform(get(getDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").isNotEmpty())
+                .andDo(print());
+
+    }
+
+    @Test
+    void shouldDeleteDevice() throws Exception {
+
+        Map<String, UUID> param = new HashMap<>();
+        param.put("id", UUID.randomUUID());
+
+        URI deleteDeviceURI = UriComponentsBuilder.fromPath(DELETE_DEVICE)
+                .buildAndExpand(param)
+                .toUri();
+
+        mockMvc.perform(delete(deleteDeviceURI))
+                .andExpect(status().isNoContent())
+                .andDo(print());
+
+    }
+
+    @Test
+    void shouldNotDeleteDeviceBecauseDeviceNotFound() throws Exception {
+
+        doThrow(DeviceNotFoundException.class).when(deviceService).delete(any(UUID.class));
+
+        Map<String, UUID> param = new HashMap<>();
+        param.put("id", UUID.randomUUID());
+
+        URI deleteDeviceURI = UriComponentsBuilder.fromPath(DELETE_DEVICE)
+                .buildAndExpand(param)
+                .toUri();
+
+        mockMvc.perform(delete(deleteDeviceURI))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+
+    }
+
+    @Test
+    void shouldNotDeleteDeviceBecauseDeviceIsInUse() throws Exception {
+
+        doThrow(DeviceInUseException.class).when(deviceService).delete(any(UUID.class));
+
+        Map<String, UUID> param = new HashMap<>();
+        param.put("id", UUID.randomUUID());
+
+        URI deleteDeviceURI = UriComponentsBuilder.fromPath(DELETE_DEVICE)
+                .buildAndExpand(param)
+                .toUri();
+
+        mockMvc.perform(delete(deleteDeviceURI))
+                .andExpect(status().isForbidden())
                 .andDo(print());
 
     }
