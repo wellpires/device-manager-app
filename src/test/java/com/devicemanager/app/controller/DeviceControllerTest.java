@@ -38,6 +38,7 @@ class DeviceControllerTest {
     private static final String GET_DEVICES = BASE_URL.concat("");
     private static final String GET_DEVICE = BASE_URL.concat("/{id}");
     private static final String DELETE_DEVICE = BASE_URL.concat("/{id}");
+    private static final String POST_UPDATE_DEVICE = BASE_URL.concat("/{id}");
 
     @Autowired
     private ObjectMapper mapper;
@@ -193,6 +194,87 @@ class DeviceControllerTest {
         mockMvc.perform(delete(deleteDeviceURI))
                 .andExpect(status().isForbidden())
                 .andDo(print());
+    }
+
+    @Test
+    void shouldDUpdateDevice() throws Exception {
+
+        DeviceDTO deviceDTO = DeviceDTO.builder()
+                .brand("brand-test")
+                .name("name-test")
+                .build();
+
+        DeviceRequest deviceRequest = DeviceRequest.builder()
+                .deviceDTO(deviceDTO)
+                .build();
+
+        Map<String, UUID> param = new HashMap<>();
+        param.put("id", UUID.randomUUID());
+
+        URI postDeviceURI = UriComponentsBuilder.fromPath(POST_UPDATE_DEVICE)
+                .buildAndExpand(param)
+                .toUri();
+
+        String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
+        mockMvc.perform(post(postDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+                .andExpect(status().isNoContent())
+                .andDo(print());
 
     }
+
+    @Test
+    void shouldNotUpdateDeviceBecauseDeviceNotFound() throws Exception {
+
+        doThrow(DeviceNotFoundException.class).when(deviceService).update(any(UUID.class), any(DeviceDTO.class));
+
+        DeviceDTO deviceDTO = DeviceDTO.builder()
+                .brand("brand-test")
+                .name("name-test")
+                .build();
+
+        DeviceRequest deviceRequest = DeviceRequest.builder()
+                .deviceDTO(deviceDTO)
+                .build();
+
+        Map<String, UUID> param = new HashMap<>();
+        param.put("id", UUID.randomUUID());
+
+        URI postDeviceURI = UriComponentsBuilder.fromPath(POST_UPDATE_DEVICE)
+                .buildAndExpand(param)
+                .toUri();
+
+        String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
+        mockMvc.perform(post(postDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+
+    }
+
+    @Test
+    void shouldNotUpdateDeviceBecauseDeviceIsInUse() throws Exception {
+
+        doThrow(DeviceInUseException.class).when(deviceService).update(any(UUID.class), any(DeviceDTO.class));
+
+        DeviceDTO deviceDTO = DeviceDTO.builder()
+                .brand("brand-test")
+                .name("name-test")
+                .build();
+
+        DeviceRequest deviceRequest = DeviceRequest.builder()
+                .deviceDTO(deviceDTO)
+                .build();
+
+        Map<String, UUID> param = new HashMap<>();
+        param.put("id", UUID.randomUUID());
+
+        URI postDeviceURI = UriComponentsBuilder.fromPath(POST_UPDATE_DEVICE)
+                .buildAndExpand(param)
+                .toUri();
+
+        String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
+        mockMvc.perform(post(postDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+                .andExpect(status().isForbidden())
+                .andDo(print());
+    }
+
 }
