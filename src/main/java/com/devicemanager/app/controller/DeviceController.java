@@ -1,15 +1,15 @@
 package com.devicemanager.app.controller;
 
 import com.devicemanager.app.controller.resource.DeviceResource;
+import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
 import com.devicemanager.app.service.DeviceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -39,5 +39,11 @@ public class DeviceController implements DeviceResource {
                 .toUri();
 
         return ResponseEntity.created(deviceCreateURI).build();
+    }
+
+    @Override
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Page<DeviceDTO> list(Pageable pageable) {
+        return deviceService.list(pageable);
     }
 }
