@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234567890
+      POSTGRES_DB: device_management_db
+    ports:
+      - "5432:5432"
+
+  spring-boot-app:
+    build:
+      context: .
+    container_name: spring-boot-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/device_management_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234567890
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
