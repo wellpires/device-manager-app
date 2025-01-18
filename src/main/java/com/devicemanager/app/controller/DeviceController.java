@@ -60,5 +60,14 @@ public class DeviceController implements DeviceResource {
         return ResponseEntity.ok(deviceResponse);
     }
 
+    @Override
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
+
+        deviceService.delete(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
