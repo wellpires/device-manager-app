@@ -7,11 +7,10 @@ import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.repository.DeviceRepository;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,7 +28,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +38,9 @@ class DeviceServiceImplTest {
 
     @Mock
     private DeviceRepository deviceRepository;
+
+    @Captor
+    private ArgumentCaptor<DeviceEntity> deviceEntityArgumentCaptor;
 
     @Test
     void shouldCreate() {
@@ -151,6 +152,63 @@ class DeviceServiceImplTest {
         });
 
         verify(deviceRepository, never()).delete(any(DeviceEntity.class));
+
+    }
+
+    @Test
+    void shouldUpdateDevice() {
+
+        DeviceEntity deviceEntity = DeviceEntity.builder()
+                .id(UUID.randomUUID())
+                .name(RandomStringUtils.secure().nextAlphanumeric(10))
+                .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .build();
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
+
+        DeviceDTO deviceDTO = DeviceDTO.builder()
+                .name("new-device-name")
+                .brand("new-brand-name")
+                .build();
+        deviceService.update(UUID.randomUUID(), deviceDTO);
+
+        verify(deviceRepository, times(1)).save(any(DeviceEntity.class));
+        verify(deviceRepository).save(deviceEntityArgumentCaptor.capture());
+
+        DeviceEntity deviceEntityCaught = deviceEntityArgumentCaptor.getValue();
+        assertThat(deviceEntityCaught.getName(), equalTo(deviceDTO.name()));
+        assertThat(deviceEntityCaught.getBrand(), equalTo(deviceDTO.brand()));
+
+    }
+
+    @Test
+    void shouldNotUpdateDeviceBecauseDeviceNotFound() {
+
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThrows(DeviceNotFoundException.class, () -> {
+            deviceService.update(UUID.randomUUID(), DeviceDTO.builder().build());
+        });
+
+        verify(deviceRepository, never()).save(any(DeviceEntity.class));
+
+    }
+
+    @Test
+    void shouldNotUpdateDeviceBecauseDeviceIsInUse() {
+
+        DeviceEntity deviceEntity = DeviceEntity.builder()
+                .id(UUID.randomUUID())
+                .name(RandomStringUtils.secure().nextAlphanumeric(10))
+                .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .state(StateEnum.IN_USE)
+                .build();
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
+
+        assertThrows(DeviceInUseException.class, () -> {
+            deviceService.update(UUID.randomUUID(), DeviceDTO.builder().build());
+        });
+
+        verify(deviceRepository, never()).save(any(DeviceEntity.class));
 
     }
 
