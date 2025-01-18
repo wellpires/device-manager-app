@@ -69,5 +69,13 @@ public class DeviceController implements DeviceResource {
         return ResponseEntity.noContent().build();
     }
 
+    @Override
+    @PostMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> update(@PathVariable("id") UUID id, @RequestBody DeviceRequest deviceRequest) {
+
+        deviceService.update(id, deviceRequest.deviceDTO());
+
+        return ResponseEntity.noContent().build();
+    }
 
 }
