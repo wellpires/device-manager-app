@@ -5,11 +5,14 @@ import com.devicemanager.app.dto.request.DeviceRequest;
 import com.devicemanager.app.dto.response.DeviceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
@@ -47,6 +50,19 @@ public interface DeviceResource {
             example = "974ced59-46a6-4080-9025-597ea6cc4643",
             description = "Device id",
             required = true) UUID id);
+
+    @Operation(summary = "Update a device")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Device updated"),
+            @ApiResponse(responseCode = "404", description = "Device not found"),
+            @ApiResponse(responseCode = "403", description = "Device cannot be deleted"),
+            @ApiResponse(responseCode = "500", description = "Internal server error!")})
+    ResponseEntity<Void> update(@Parameter(name = "id",
+            example = "974ced59-46a6-4080-9025-597ea6cc4643",
+            description = "Device id",
+            required = true) UUID id,
+                                @RequestBody(description = "Device body to update")
+                                DeviceRequest deviceRequest);
 
 
 }
