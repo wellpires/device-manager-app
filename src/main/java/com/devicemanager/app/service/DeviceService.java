@@ -11,4 +11,6 @@ public interface DeviceService {
     UUID create(DeviceDTO deviceDTO);
 
     Page<DeviceDTO> list(Pageable pageable);
+
+    DeviceDTO find(UUID id);
 }

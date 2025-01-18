@@ -3,6 +3,7 @@ package com.devicemanager.app.service;
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.entity.DeviceEntity;
 import com.devicemanager.app.enums.StateEnum;
+import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.mapper.DeviceEntity2DeviceDTOMapper;
 import com.devicemanager.app.repository.DeviceRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +36,12 @@ public class DeviceServiceImpl implements DeviceService {
     public Page<DeviceDTO> list(Pageable pageable) {
         return deviceRepository.findAll(pageable)
                 .map(new DeviceEntity2DeviceDTOMapper());
+    }
+
+    @Override
+    public DeviceDTO find(UUID id) {
+        return deviceRepository.findById(id)
+                .map(new DeviceEntity2DeviceDTOMapper())
+                .orElseThrow(() -> new DeviceNotFoundException(id));
     }
 }
