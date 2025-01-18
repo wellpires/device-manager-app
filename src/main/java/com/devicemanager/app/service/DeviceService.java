@@ -15,4 +15,6 @@ public interface DeviceService {
     DeviceDTO find(UUID id);
 
     void delete(UUID id);
+
+    void update(UUID id, DeviceDTO deviceDTO);
 }

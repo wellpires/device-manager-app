@@ -57,4 +57,21 @@ public class DeviceServiceImpl implements DeviceService {
 
         deviceRepository.delete(deviceEntity);
     }
+
+    @Override
+    public void update(UUID id, DeviceDTO deviceDTO) {
+
+        DeviceEntity deviceEntity = deviceRepository.findById(id)
+                .orElseThrow(() -> new DeviceNotFoundException(id));
+
+        if(StateEnum.IN_USE.equals(deviceEntity.getState())){
+            throw new DeviceInUseException(String.format("Device %s cannot be modified because it is currently in use.", deviceEntity.getName()));
+        }
+
+        deviceEntity.setName(deviceDTO.name());
+        deviceEntity.setBrand(deviceDTO.brand());
+
+        deviceRepository.save(deviceEntity);
+
+    }
 }
