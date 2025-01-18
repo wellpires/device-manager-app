@@ -3,8 +3,11 @@ package com.devicemanager.app.service;
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.entity.DeviceEntity;
 import com.devicemanager.app.enums.StateEnum;
+import com.devicemanager.app.mapper.DeviceEntity2DeviceDTOMapper;
 import com.devicemanager.app.repository.DeviceRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -26,5 +29,11 @@ public class DeviceServiceImpl implements DeviceService {
 
         return deviceRepository.save(deviceEntity).getId();
 
+    }
+
+    @Override
+    public Page<DeviceDTO> list(Pageable pageable) {
+        return deviceRepository.findAll(pageable)
+                .map(new DeviceEntity2DeviceDTOMapper());
     }
 }
