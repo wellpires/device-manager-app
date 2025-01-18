@@ -37,5 +37,16 @@ public interface DeviceResource {
             description = "Device id",
             required = true) UUID id);
 
+    @Operation(summary = "Fetch a single device")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Device deleted"),
+            @ApiResponse(responseCode = "404", description = "Device not found"),
+            @ApiResponse(responseCode = "403", description = "Device cannot be deleted"),
+            @ApiResponse(responseCode = "500", description = "Internal server error!")})
+    ResponseEntity<Void> delete(@Parameter(name = "id",
+            example = "974ced59-46a6-4080-9025-597ea6cc4643",
+            description = "Device id",
+            required = true) UUID id);
+
 
 }
