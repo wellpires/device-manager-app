@@ -13,4 +13,6 @@ public interface DeviceService {
     Page<DeviceDTO> list(Pageable pageable);
 
     DeviceDTO find(UUID id);
+
+    void delete(UUID id);
 }

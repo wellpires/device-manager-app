@@ -3,6 +3,7 @@ package com.devicemanager.app.service;
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.entity.DeviceEntity;
 import com.devicemanager.app.enums.StateEnum;
+import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.mapper.DeviceEntity2DeviceDTOMapper;
 import com.devicemanager.app.repository.DeviceRepository;
@@ -43,5 +44,17 @@ public class DeviceServiceImpl implements DeviceService {
         return deviceRepository.findById(id)
                 .map(new DeviceEntity2DeviceDTOMapper())
                 .orElseThrow(() -> new DeviceNotFoundException(id));
+    }
+
+    @Override
+    public void delete(UUID id) {
+        DeviceEntity deviceEntity = deviceRepository.findById(id)
+                .orElseThrow(() -> new DeviceNotFoundException(id));
+
+        if(StateEnum.IN_USE.equals(deviceEntity.getState())){
+            throw new DeviceInUseException(String.format("Device %s cannot be deleted because it is currently in use.", deviceEntity.getName()));
+        }
+
+        deviceRepository.delete(deviceEntity);
     }
 }
