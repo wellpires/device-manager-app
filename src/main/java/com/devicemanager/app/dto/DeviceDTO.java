@@ -2,6 +2,8 @@ package com.devicemanager.app.dto;
 
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
-public record DeviceDTO(String name, String brand) {
+public record DeviceDTO(UUID id, String name, String brand) {
 }
