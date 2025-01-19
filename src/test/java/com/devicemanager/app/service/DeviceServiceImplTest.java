@@ -212,4 +212,41 @@ class DeviceServiceImplTest {
 
     }
 
+    @Test
+    void shouldUpdateDeviceState() {
+
+        DeviceEntity deviceEntity = DeviceEntity.builder()
+                .id(UUID.randomUUID())
+                .name(RandomStringUtils.secure().nextAlphanumeric(10))
+                .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .state(StateEnum.AVAILABLE)
+                .build();
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
+
+        DeviceDTO deviceDTO = DeviceDTO.builder()
+                .stateEnum(StateEnum.INACTIVE)
+                .build();
+        deviceService.changeState(UUID.randomUUID(), deviceDTO);
+
+        verify(deviceRepository, times(1)).save(any(DeviceEntity.class));
+        verify(deviceRepository).save(deviceEntityArgumentCaptor.capture());
+
+        DeviceEntity deviceEntityCaught = deviceEntityArgumentCaptor.getValue();
+        assertThat(deviceEntityCaught.getState(), equalTo(deviceDTO.stateEnum()));
+
+    }
+
+    @Test
+    void shouldNotUpdateDeviceStateBecauseDeviceNotFound() {
+
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThrows(DeviceNotFoundException.class, () -> {
+            deviceService.changeState(UUID.randomUUID(), DeviceDTO.builder().build());
+        });
+
+        verify(deviceRepository, never()).save(any(DeviceEntity.class));
+
+    }
+
 }
