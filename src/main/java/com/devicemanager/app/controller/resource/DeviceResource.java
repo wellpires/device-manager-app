@@ -3,6 +3,7 @@ package com.devicemanager.app.controller.resource;
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
 import com.devicemanager.app.dto.response.DeviceResponse;
+import com.devicemanager.app.enums.StateEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -71,8 +72,10 @@ public interface DeviceResource {
             example = "974ced59-46a6-4080-9025-597ea6cc4643",
             description = "Device id",
             required = true) UUID id,
-                                     @RequestBody(description = "Device state body to update")
-                                     DeviceRequest deviceRequest);
+                                     @Parameter(description = "Device state",
+                                             example = "IN_USE",
+                                             required = true)
+                                     StateEnum stateEnum);
 
 
 }
