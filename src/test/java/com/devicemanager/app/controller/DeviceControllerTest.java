@@ -39,8 +39,8 @@ class DeviceControllerTest {
     private static final String GET_DEVICES = BASE_URL.concat("");
     private static final String GET_DEVICE = BASE_URL.concat("/{id}");
     private static final String DELETE_DEVICE = BASE_URL.concat("/{id}");
-    private static final String POST_UPDATE_DEVICE = BASE_URL.concat("/{id}");
-    private static final String POST_UPDATE_DEVICE_STATE = BASE_URL.concat("/{id}/state");
+    private static final String PUT_UPDATE_DEVICE = BASE_URL.concat("/{id}");
+    private static final String PATCH_UPDATE_DEVICE_STATE = BASE_URL.concat("/{id}/state/{state}");
 
     @Autowired
     private ObjectMapper mapper;
@@ -199,7 +199,7 @@ class DeviceControllerTest {
     }
 
     @Test
-    void shouldDUpdateDevice() throws Exception {
+    void shouldUpdateDevice() throws Exception {
 
         DeviceDTO deviceDTO = DeviceDTO.builder()
                 .brand("brand-test")
@@ -213,12 +213,12 @@ class DeviceControllerTest {
         Map<String, UUID> param = new HashMap<>();
         param.put("id", UUID.randomUUID());
 
-        URI postDeviceURI = UriComponentsBuilder.fromPath(POST_UPDATE_DEVICE)
+        URI putDeviceURI = UriComponentsBuilder.fromPath(PUT_UPDATE_DEVICE)
                 .buildAndExpand(param)
                 .toUri();
 
         String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
-        mockMvc.perform(post(postDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+        mockMvc.perform(put(putDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
                 .andExpect(status().isNoContent())
                 .andDo(print());
 
@@ -241,12 +241,12 @@ class DeviceControllerTest {
         Map<String, UUID> param = new HashMap<>();
         param.put("id", UUID.randomUUID());
 
-        URI postDeviceURI = UriComponentsBuilder.fromPath(POST_UPDATE_DEVICE)
+        URI putDeviceURI = UriComponentsBuilder.fromPath(PUT_UPDATE_DEVICE)
                 .buildAndExpand(param)
                 .toUri();
 
         String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
-        mockMvc.perform(post(postDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+        mockMvc.perform(put(putDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
                 .andExpect(status().isNotFound())
                 .andDo(print());
 
@@ -269,12 +269,12 @@ class DeviceControllerTest {
         Map<String, UUID> param = new HashMap<>();
         param.put("id", UUID.randomUUID());
 
-        URI postDeviceURI = UriComponentsBuilder.fromPath(POST_UPDATE_DEVICE)
+        URI putDeviceURI = UriComponentsBuilder.fromPath(PUT_UPDATE_DEVICE)
                 .buildAndExpand(param)
                 .toUri();
 
         String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
-        mockMvc.perform(post(postDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+        mockMvc.perform(put(putDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
                 .andExpect(status().isForbidden())
                 .andDo(print());
     }
@@ -290,15 +290,16 @@ class DeviceControllerTest {
                 .deviceDTO(deviceDTO)
                 .build();
 
-        Map<String, UUID> param = new HashMap<>();
-        param.put("id", UUID.randomUUID());
+        Map<String, String> param = new HashMap<>();
+        param.put("id", UUID.randomUUID().toString());
+        param.put("state", StateEnum.IN_USE.name());
 
-        URI postDeviceURI = UriComponentsBuilder.fromPath(POST_UPDATE_DEVICE_STATE)
+        URI patchDeviceURI = UriComponentsBuilder.fromPath(PATCH_UPDATE_DEVICE_STATE)
                 .buildAndExpand(param)
                 .toUri();
 
         String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
-        mockMvc.perform(patch(postDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+        mockMvc.perform(patch(patchDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
                 .andExpect(status().isNoContent())
                 .andDo(print());
 
@@ -307,25 +308,17 @@ class DeviceControllerTest {
     @Test
     void shouldNotUpdateDeviceStateBecauseDeviceNotFound() throws Exception {
 
-        doThrow(DeviceNotFoundException.class).when(deviceService).changeState(any(UUID.class), any(DeviceDTO.class));
+        doThrow(DeviceNotFoundException.class).when(deviceService).changeState(any(UUID.class), any(StateEnum.class));
 
-        DeviceDTO deviceDTO = DeviceDTO.builder()
-                .stateEnum(StateEnum.INACTIVE)
-                .build();
+        Map<String, String> param = new HashMap<>();
+        param.put("id", UUID.randomUUID().toString());
+        param.put("state", StateEnum.IN_USE.name());
 
-        DeviceRequest deviceRequest = DeviceRequest.builder()
-                .deviceDTO(deviceDTO)
-                .build();
-
-        Map<String, UUID> param = new HashMap<>();
-        param.put("id", UUID.randomUUID());
-
-        URI postDeviceURI = UriComponentsBuilder.fromPath(POST_UPDATE_DEVICE_STATE)
+        URI patchDeviceURI = UriComponentsBuilder.fromPath(PATCH_UPDATE_DEVICE_STATE)
                 .buildAndExpand(param)
                 .toUri();
 
-        String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
-        mockMvc.perform(patch(postDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+        mockMvc.perform(patch(patchDeviceURI).contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())
                 .andDo(print());
 
