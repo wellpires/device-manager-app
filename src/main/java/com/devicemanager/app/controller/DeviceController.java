@@ -78,4 +78,13 @@ public class DeviceController implements DeviceResource {
         return ResponseEntity.noContent().build();
     }
 
+    @Override
+    @PatchMapping(path = "/{id}/state")
+    public ResponseEntity<Void> changeState(@PathVariable("id") UUID id, @RequestBody DeviceRequest deviceRequest) {
+
+        deviceService.changeState(id, deviceRequest.deviceDTO());
+
+        return ResponseEntity.noContent().build();
+    }
+
 }
