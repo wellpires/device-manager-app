@@ -76,12 +76,12 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public void changeState(UUID id, DeviceDTO deviceDTO) {
+    public void changeState(UUID id, StateEnum stateEnum) {
 
         DeviceEntity deviceEntity = deviceRepository.findById(id)
                 .orElseThrow(() -> new DeviceNotFoundException(id));
 
-        deviceEntity.setState(deviceDTO.stateEnum());
+        deviceEntity.setState(stateEnum);
 
         deviceRepository.save(deviceEntity);
 

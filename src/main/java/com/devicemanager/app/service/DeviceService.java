@@ -1,6 +1,7 @@
 package com.devicemanager.app.service;
 
 import com.devicemanager.app.dto.DeviceDTO;
+import com.devicemanager.app.enums.StateEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,5 +19,5 @@ public interface DeviceService {
 
     void update(UUID id, DeviceDTO deviceDTO);
 
-    void changeState(UUID id, DeviceDTO deviceDTO);
+    void changeState(UUID id, StateEnum stateEnum);
 }
