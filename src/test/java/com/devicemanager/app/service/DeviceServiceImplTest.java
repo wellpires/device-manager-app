@@ -45,6 +45,9 @@ class DeviceServiceImplTest {
     @Test
     void shouldCreate() {
 
+        DeviceEntity deviceEntity = DeviceEntity.builder().id(UUID.randomUUID()).build();
+        when(deviceRepository.save(any(DeviceEntity.class))).thenReturn(deviceEntity);
+
         DeviceDTO deviceDTO = DeviceDTO.builder()
                 .name("name-test")
                 .brand("brand-test")
