@@ -53,7 +53,7 @@ public interface DeviceResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Device updated"),
             @ApiResponse(responseCode = "404", description = "Device not found"),
-            @ApiResponse(responseCode = "403", description = "Device cannot be deleted"),
+            @ApiResponse(responseCode = "403", description = "Device cannot be updated"),
             @ApiResponse(responseCode = "500", description = "Internal server error!")})
     ResponseEntity<Void> update(@Parameter(name = "id",
             example = "974ced59-46a6-4080-9025-597ea6cc4643",
