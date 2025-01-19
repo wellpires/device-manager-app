@@ -4,6 +4,7 @@ import com.devicemanager.app.controller.resource.DeviceResource;
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
 import com.devicemanager.app.dto.response.DeviceResponse;
+import com.devicemanager.app.enums.StateEnum;
 import com.devicemanager.app.service.DeviceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -79,10 +80,10 @@ public class DeviceController implements DeviceResource {
     }
 
     @Override
-    @PatchMapping(path = "/{id}/state")
-    public ResponseEntity<Void> changeState(@PathVariable("id") UUID id, @RequestBody DeviceRequest deviceRequest) {
+    @PatchMapping(path = "/{id}/state/{state}")
+    public ResponseEntity<Void> changeState(@PathVariable("id") UUID id, @PathVariable("state") StateEnum stateEnum) {
 
-        deviceService.changeState(id, deviceRequest.deviceDTO());
+        deviceService.changeState(id, stateEnum);
 
         return ResponseEntity.noContent().build();
     }
