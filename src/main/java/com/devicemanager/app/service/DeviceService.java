@@ -17,4 +17,6 @@ public interface DeviceService {
     void delete(UUID id);
 
     void update(UUID id, DeviceDTO deviceDTO);
+
+    void changeState(UUID id, DeviceDTO deviceDTO);
 }

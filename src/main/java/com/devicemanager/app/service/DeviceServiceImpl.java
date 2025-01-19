@@ -74,4 +74,16 @@ public class DeviceServiceImpl implements DeviceService {
         deviceRepository.save(deviceEntity);
 
     }
+
+    @Override
+    public void changeState(UUID id, DeviceDTO deviceDTO) {
+
+        DeviceEntity deviceEntity = deviceRepository.findById(id)
+                .orElseThrow(() -> new DeviceNotFoundException(id));
+
+        deviceEntity.setState(deviceDTO.stateEnum());
+
+        deviceRepository.save(deviceEntity);
+
+    }
 }
