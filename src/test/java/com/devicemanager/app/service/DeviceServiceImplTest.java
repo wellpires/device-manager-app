@@ -226,16 +226,13 @@ class DeviceServiceImplTest {
                 .build();
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
 
-        DeviceDTO deviceDTO = DeviceDTO.builder()
-                .stateEnum(StateEnum.INACTIVE)
-                .build();
-        deviceService.changeState(UUID.randomUUID(), deviceDTO);
+        deviceService.changeState(UUID.randomUUID(), StateEnum.INACTIVE);
 
         verify(deviceRepository, times(1)).save(any(DeviceEntity.class));
         verify(deviceRepository).save(deviceEntityArgumentCaptor.capture());
 
         DeviceEntity deviceEntityCaught = deviceEntityArgumentCaptor.getValue();
-        assertThat(deviceEntityCaught.getState(), equalTo(deviceDTO.stateEnum()));
+        assertThat(deviceEntityCaught.getState(), equalTo(StateEnum.INACTIVE));
 
     }
 
@@ -245,7 +242,7 @@ class DeviceServiceImplTest {
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(DeviceNotFoundException.class, () -> {
-            deviceService.changeState(UUID.randomUUID(), DeviceDTO.builder().build());
+            deviceService.changeState(UUID.randomUUID(), StateEnum.INACTIVE);
         });
 
         verify(deviceRepository, never()).save(any(DeviceEntity.class));
