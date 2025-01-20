@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Table(schema = "dmn", name = "device_approval_requests")
+@Table(schema = "dvc", name = "device_approval_requests")
 @Entity
 @Data
 @Builder

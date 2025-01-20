@@ -29,12 +29,15 @@ public class DeviceEntity {
     @Column(name = "brand")
     private String brand;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "state")
-    private StateEnum state;
+    @Column(name = "state_id")
+    private UUID stateId;
 
     @CreationTimestamp
     @Column(name = "created_date")
     private LocalDateTime createdDate;
+
+    @ManyToOne
+    @JoinColumn(name = "state_id", updatable = false, insertable = false)
+    private DeviceStateEntity deviceStateEntity;
 
 }
