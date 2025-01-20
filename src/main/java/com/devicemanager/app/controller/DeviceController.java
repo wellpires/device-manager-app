@@ -4,6 +4,7 @@ import com.devicemanager.app.controller.resource.DeviceResource;
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.dto.DeviceStateRequestDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
+import com.devicemanager.app.dto.request.DeviceStateRequest;
 import com.devicemanager.app.dto.response.DeviceResponse;
 import com.devicemanager.app.dto.response.DeviceStateRequestResponse;
 import com.devicemanager.app.enums.StateEnum;
@@ -107,6 +108,15 @@ public class DeviceController implements DeviceResource {
     public ResponseEntity<Void> approveRequest(@PathVariable("approval-request-id") UUID id) {
 
         deviceApprovalRequestService.approveRequest(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @PostMapping(path = "{id}/approval-requests", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> createDeviceStateRequest(@PathVariable("id") UUID id, @RequestBody DeviceStateRequest deviceStateRequest) {
+
+        deviceApprovalRequestService.create(id, deviceStateRequest.deviceStateDTO());
 
         return ResponseEntity.noContent().build();
     }
