@@ -1,5 +1,7 @@
 package com.devicemanager.app.service.impl;
 
+import com.devicemanager.app.dto.DeviceDTO;
+import com.devicemanager.app.dto.DeviceStateDTO;
 import com.devicemanager.app.dto.DeviceStateRequestDTO;
 import com.devicemanager.app.entity.DeviceApprovalRequestEntity;
 import com.devicemanager.app.entity.DeviceEntity;
@@ -7,6 +9,7 @@ import com.devicemanager.app.entity.DeviceStateEntity;
 import com.devicemanager.app.enums.StateEnum;
 import com.devicemanager.app.repository.DeviceApprovalRequestRepository;
 import com.devicemanager.app.service.DeviceService;
+import com.devicemanager.app.service.DeviceStateService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -40,6 +43,9 @@ class DeviceApprovalRequestServiceImplTest {
 
     @Mock
     private DeviceService deviceService;
+
+    @Mock
+    private DeviceStateService deviceStateService;
 
     @Test
     void shouldListStatesRequests() {
@@ -83,6 +89,22 @@ class DeviceApprovalRequestServiceImplTest {
 
         verify(deviceService, times(1)).changeState(any(UUID.class), any(UUID.class));
         verify(deviceApprovalRequestRepository, times(1)).delete(any(DeviceApprovalRequestEntity.class));
+
+    }
+
+    @Test
+    void shouldCreate(){
+
+        DeviceDTO deviceDTO = DeviceDTO.builder().id(UUID.randomUUID()).build();
+        when(deviceService.find(any(UUID.class))).thenReturn(deviceDTO);
+
+        DeviceStateDTO deviceStateDTOFound = DeviceStateDTO.builder().build();
+        when(deviceStateService.findByName(any(StateEnum.class))).thenReturn(deviceStateDTOFound);
+
+        DeviceStateDTO deviceStateDTO = DeviceStateDTO.builder().name(StateEnum.AVAILABLE).build();
+        deviceApprovalRequestService.create(UUID.randomUUID(), deviceStateDTO);
+
+        verify(deviceApprovalRequestRepository, times(1)).save(any(DeviceApprovalRequestEntity.class));
 
     }
 }
