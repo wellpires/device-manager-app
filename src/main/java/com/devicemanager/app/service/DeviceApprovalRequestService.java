@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface DeviceApprovalRequestService {
     List<DeviceStateRequestDTO> listStatesRequests(UUID deviceId);
+
+    void approveRequest(UUID id);
 }
