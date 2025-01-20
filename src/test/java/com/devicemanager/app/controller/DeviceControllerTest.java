@@ -1,10 +1,13 @@
 package com.devicemanager.app.controller;
 
 import com.devicemanager.app.dto.DeviceDTO;
+import com.devicemanager.app.dto.DeviceStateRequestDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
 import com.devicemanager.app.enums.StateEnum;
 import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
+import com.devicemanager.app.exception.DeviceStateNotFoundException;
+import com.devicemanager.app.service.DeviceApprovalRequestService;
 import com.devicemanager.app.service.DeviceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -41,6 +44,7 @@ class DeviceControllerTest {
     private static final String DELETE_DEVICE = BASE_URL.concat("/{id}");
     private static final String PUT_UPDATE_DEVICE = BASE_URL.concat("/{id}");
     private static final String PATCH_UPDATE_DEVICE_STATE = BASE_URL.concat("/{id}/state/{state}");
+    private static final String GET_DEVICE_STATE_REQUESTS = BASE_URL.concat("/{id}/approval-requests");
 
     @Autowired
     private ObjectMapper mapper;
@@ -50,6 +54,9 @@ class DeviceControllerTest {
 
     @MockitoBean
     private DeviceService deviceService;
+
+    @MockitoBean
+    private DeviceApprovalRequestService deviceApprovalRequestService;
 
     @Test
     void shouldCreate() throws Exception {
@@ -71,6 +78,28 @@ class DeviceControllerTest {
         mockMvc.perform(post(POST_CREATE_DEVICES).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/devices/".concat(deviceId.toString())))
+                .andDo(print());
+
+    }
+
+    @Test
+    void shouldNotCreateBecauseDeviceStateNotFound() throws Exception {
+
+        when(deviceService.create(any(DeviceDTO.class))).thenThrow(DeviceStateNotFoundException.class);
+
+        DeviceDTO deviceDTO = DeviceDTO.builder()
+                .brand("brand-test")
+                .name("name-test")
+                .build();
+
+        DeviceRequest deviceRequest = DeviceRequest.builder()
+                .deviceDTO(deviceDTO)
+                .build();
+
+        String jsonRequestBody = mapper.writeValueAsString(deviceRequest);
+
+        mockMvc.perform(post(POST_CREATE_DEVICES).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonRequestBody))
+                .andExpect(status().isNotFound())
                 .andDo(print());
 
     }
@@ -322,6 +351,38 @@ class DeviceControllerTest {
                 .andExpect(status().isNotFound())
                 .andDo(print());
 
+    }
+
+    @Test
+    void shouldListStatesRequests() throws Exception {
+
+        List<DeviceStateRequestDTO> deviceStateRequestDTOs = new ArrayList<>();
+        for(int i = 0; i < 10; i++){
+
+            DeviceStateRequestDTO deviceStateRequestDTO = DeviceStateRequestDTO.builder()
+                    .id(UUID.randomUUID())
+                    .deviceName(RandomStringUtils.secure().nextAlphanumeric(10))
+                    .state(StateEnum.AVAILABLE)
+                    .build();
+
+            deviceStateRequestDTOs.add(deviceStateRequestDTO);
+        }
+
+        when(deviceApprovalRequestService.listStatesRequests(any(UUID.class))).thenReturn(deviceStateRequestDTOs);
+
+        Map<String, String> param = new HashMap<>();
+        param.put("id", UUID.randomUUID().toString());
+        param.put("state", StateEnum.IN_USE.name());
+
+        URI getDeviceStateRequests = UriComponentsBuilder.fromPath(GET_DEVICE_STATE_REQUESTS)
+                .buildAndExpand(param)
+                .toUri();
+
+        mockMvc.perform(get(getDeviceStateRequests).contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.state-requests").isArray())
+                .andExpect(jsonPath("$.state-requests.length()").value(10))
+                .andDo(print());
     }
 
 }
