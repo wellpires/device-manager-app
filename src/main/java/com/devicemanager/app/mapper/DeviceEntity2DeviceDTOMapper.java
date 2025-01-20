@@ -13,7 +13,7 @@ public class DeviceEntity2DeviceDTOMapper implements Function<DeviceEntity, Devi
                 .id(deviceEntity.getId())
                 .name(deviceEntity.getName())
                 .brand(deviceEntity.getBrand())
-                .stateEnum(deviceEntity.getState())
+                .stateEnum(deviceEntity.getDeviceStateEntity().getState())
                 .build();
     }
 }
