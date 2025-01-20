@@ -57,4 +57,33 @@ class DeviceStateServiceImplTest {
         });
 
     }
+
+    @Test
+    void shouldFindById() {
+
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .id(UUID.randomUUID())
+                .state(StateEnum.AVAILABLE)
+                .build();
+        when(deviceStateRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceStateEntity));
+
+        DeviceStateDTO deviceStateDTO = deviceStateService.findById(UUID.randomUUID());
+
+        assertThat(deviceStateDTO, is(notNullValue()));
+        assertThat(deviceStateDTO.id(), equalTo(deviceStateEntity.getId()));
+        assertThat(deviceStateDTO.name(), equalTo(deviceStateEntity.getState()));
+
+    }
+
+    @Test
+    void shouldNotFindByIdBecauseNotFound() {
+
+        when(deviceStateRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThrows(DeviceStateNotFoundException.class, () -> {
+            deviceStateService.findById(UUID.randomUUID());
+        });
+
+
+    }
 }
