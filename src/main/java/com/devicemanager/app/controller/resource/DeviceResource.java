@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
@@ -87,5 +89,15 @@ public interface DeviceResource {
                                                                            example = "974ced59-46a6-4080-9025-597ea6cc4643",
                                                                            description = "Device id",
                                                                            required = true) UUID id);
+
+    @Operation(summary = "Approve Device State Requests")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Device State request approved"),
+            @ApiResponse(responseCode = "404", description = "Device State request not found!"),
+            @ApiResponse(responseCode = "500", description = "Internal server error!")})
+    ResponseEntity<Void> approveRequest(@Parameter(name = "id",
+                                                    example = "974ced59-46a6-4080-9025-597ea6cc4643",
+                                                    description = "Device State Approval Request id",
+                                                    required = true) UUID id);
 
 }
