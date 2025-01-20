@@ -2,7 +2,6 @@ package com.devicemanager.app.service.impl;
 
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.dto.DeviceStateDTO;
-import com.devicemanager.app.dto.DeviceStateRequestDTO;
 import com.devicemanager.app.entity.DeviceEntity;
 import com.devicemanager.app.enums.StateEnum;
 import com.devicemanager.app.exception.DeviceInUseException;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -94,6 +92,20 @@ public class DeviceServiceImpl implements DeviceService {
         if(StateEnum.IN_USE.equals(deviceEntity.getDeviceStateEntity().getState())){
             throw new DeviceInUseException(String.format("In Use Devices %s cannot be modified without activation request", deviceEntity.getName()));
         }
+
+        deviceEntity.setStateId(deviceStateDTO.id());
+
+        deviceRepository.save(deviceEntity);
+
+    }
+
+    @Override
+    public void changeState(UUID id, UUID stateId) {
+
+        DeviceEntity deviceEntity = deviceRepository.findById(id)
+                .orElseThrow(() -> new DeviceNotFoundException(id));
+
+        DeviceStateDTO deviceStateDTO = deviceStateService.findById(stateId);
 
         deviceEntity.setStateId(deviceStateDTO.id());
 
