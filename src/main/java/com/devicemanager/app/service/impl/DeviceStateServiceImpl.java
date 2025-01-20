@@ -9,6 +9,8 @@ import com.devicemanager.app.service.DeviceStateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class DeviceStateServiceImpl implements DeviceStateService {
@@ -21,5 +23,12 @@ public class DeviceStateServiceImpl implements DeviceStateService {
         return deviceStateRepository.findByState(stateEnum)
                 .map(new DeviceStateEntity2DeviceStateDTOMapper())
                 .orElseThrow(() -> new DeviceStateNotFoundException(stateEnum));
+    }
+
+    @Override
+    public DeviceStateDTO findById(UUID stateId) {
+        return deviceStateRepository.findById(stateId)
+                .map(new DeviceStateEntity2DeviceStateDTOMapper())
+                .orElseThrow(() -> new DeviceStateNotFoundException(stateId));
     }
 }
