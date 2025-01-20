@@ -1,10 +1,7 @@
 package com.devicemanager.app.controller;
 
 import com.devicemanager.app.dto.response.ErrorResponse;
-import com.devicemanager.app.exception.DeviceInUseException;
-import com.devicemanager.app.exception.DeviceNotFoundException;
-import com.devicemanager.app.exception.DeviceStateNotFoundException;
-import com.devicemanager.app.exception.DeviceStateRequestNotFound;
+import com.devicemanager.app.exception.*;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -46,17 +43,19 @@ public class DeviceControllerAdvice {
 
     }
 
-    @ExceptionHandler(DeviceInUseException.class)
-    public ResponseEntity<ErrorResponse> handleDeviceInUseException(DeviceInUseException diuEx) {
+    @ExceptionHandler({DeviceInUseException.class,
+                        DeviceActivationException.class})
+    public ResponseEntity<ErrorResponse> handleDeviceInUseException(Exception ex) {
 
-        log.error(diuEx.getMessage(), diuEx);
+        log.error(ex.getMessage(), ex);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .message(diuEx.getMessage())
+                .message(ex.getMessage())
                 .build();
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
 
     }
+
 
 }
