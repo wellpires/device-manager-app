@@ -5,6 +5,7 @@ import com.devicemanager.app.dto.DeviceStateDTO;
 import com.devicemanager.app.entity.DeviceEntity;
 import com.devicemanager.app.entity.DeviceStateEntity;
 import com.devicemanager.app.enums.StateEnum;
+import com.devicemanager.app.exception.DeviceActivationException;
 import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.repository.DeviceRepository;
@@ -332,6 +333,37 @@ class DeviceServiceImplTest {
         when(deviceStateService.findByName(any(StateEnum.class))).thenReturn(deviceStateDTO);
 
         assertThrows(DeviceInUseException.class, () -> {
+            deviceService.changeState(UUID.randomUUID(), StateEnum.INACTIVE);
+        });
+
+        verify(deviceRepository, never()).save(any(DeviceEntity.class));
+
+    }
+
+    @Test
+    void shouldNotUpdateDeviceStateBecauseItIsInactive() {
+
+        UUID deviceStateAvailableId = UUID.randomUUID();
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .id(deviceStateAvailableId)
+                .state(StateEnum.INACTIVE)
+                .build();
+
+        DeviceEntity deviceEntity = DeviceEntity.builder()
+                .id(UUID.randomUUID())
+                .name(RandomStringUtils.secure().nextAlphanumeric(10))
+                .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .deviceStateEntity(deviceStateEntity)
+                .build();
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
+
+        DeviceStateDTO deviceStateDTO = DeviceStateDTO.builder()
+                .id(UUID.randomUUID())
+                .name(StateEnum.AVAILABLE)
+                .build();
+        when(deviceStateService.findByName(any(StateEnum.class))).thenReturn(deviceStateDTO);
+
+        assertThrows(DeviceActivationException.class, () -> {
             deviceService.changeState(UUID.randomUUID(), StateEnum.INACTIVE);
         });
 
