@@ -1,3 +1,4 @@
+
 # Device Management Application
 
 A CRUD application for managing devices with state transitions and approval workflows.
@@ -65,10 +66,12 @@ The complete API documentation is available at:
 1. Build the application:
    ```bash
    mvn clean package
+   ```
 
 2. Start the application using Docker Compose:
    ```bash
    docker compose up
+   ```
 
 ### Technologies Used
 * Spring Boot: Backend framework.
@@ -85,3 +88,6 @@ The complete API documentation is available at:
 - The application is designed to demonstrate clean code principles and adherence to best practices.
 - Focus on the validation logic for state transitions, as it highlights the application's business rules.
 - Swagger UI provides detailed information on API endpoints for testing and exploration.
+
+## Postman Collection
+[device-manager-app-postman-collection.json](https://github.com/wellpires/device-manager-app/blob/master/devices-app.postman_collection.json)
