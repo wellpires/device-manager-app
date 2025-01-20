@@ -4,6 +4,7 @@ import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.dto.DeviceStateDTO;
 import com.devicemanager.app.entity.DeviceEntity;
 import com.devicemanager.app.enums.StateEnum;
+import com.devicemanager.app.exception.DeviceActivationException;
 import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.mapper.DeviceEntity2DeviceDTOMapper;
@@ -89,8 +90,13 @@ public class DeviceServiceImpl implements DeviceService {
 
         DeviceStateDTO deviceStateDTO = deviceStateService.findByName(stateEnum);
 
-        if(StateEnum.IN_USE.equals(deviceEntity.getDeviceStateEntity().getState())){
-            throw new DeviceInUseException(String.format("In Use Devices %s cannot be modified without activation request", deviceEntity.getName()));
+        if (StateEnum.IN_USE.equals(deviceEntity.getDeviceStateEntity().getState()) &&
+                StateEnum.INACTIVE.equals(stateEnum)) {
+                throw new DeviceInUseException(String.format("Device %s State cannot be changed because it is currently in use.", deviceEntity.getName()));
+        }
+
+        if(StateEnum.INACTIVE.equals(deviceEntity.getDeviceStateEntity().getState())){
+            throw new DeviceActivationException(String.format("Inactive Devices %s cannot be modified without activation requests", deviceEntity.getName()));
         }
 
         deviceEntity.setStateId(deviceStateDTO.id());
