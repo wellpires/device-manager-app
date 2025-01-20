@@ -102,4 +102,13 @@ public class DeviceController implements DeviceResource {
         return ResponseEntity.ok(DeviceStateRequestResponse.builder().deviceStateRequestDTOs(deviceStateRequestDTOs).build());
     }
 
+    @Override
+    @PutMapping(path = "/approval-requests/{approval-request-id}")
+    public ResponseEntity<Void> approveRequest(@PathVariable("approval-request-id") UUID id) {
+
+        deviceApprovalRequestService.approveRequest(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }
