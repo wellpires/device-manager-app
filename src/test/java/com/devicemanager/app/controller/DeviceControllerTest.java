@@ -7,6 +7,7 @@ import com.devicemanager.app.enums.StateEnum;
 import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.exception.DeviceStateNotFoundException;
+import com.devicemanager.app.exception.DeviceStateRequestNotFound;
 import com.devicemanager.app.service.DeviceApprovalRequestService;
 import com.devicemanager.app.service.DeviceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,7 @@ class DeviceControllerTest {
     private static final String PUT_UPDATE_DEVICE = BASE_URL.concat("/{id}");
     private static final String PATCH_UPDATE_DEVICE_STATE = BASE_URL.concat("/{id}/state/{state}");
     private static final String GET_DEVICE_STATE_REQUESTS = BASE_URL.concat("/{id}/approval-requests");
+    private static final String PUT_APPROVE_DEVICE_STATE_REQUEST = BASE_URL.concat("/approval-requests/{approval-request-id}");
 
     @Autowired
     private ObjectMapper mapper;
@@ -383,6 +385,40 @@ class DeviceControllerTest {
                 .andExpect(jsonPath("$.state-requests").isArray())
                 .andExpect(jsonPath("$.state-requests.length()").value(10))
                 .andDo(print());
+    }
+
+    @Test
+    void shouldApproveRequest() throws Exception {
+
+        Map<String, String> param = new HashMap<>();
+        param.put("approval-request-id", UUID.randomUUID().toString());
+
+        URI putApproveDeviceStateRequestURI = UriComponentsBuilder.fromPath(PUT_APPROVE_DEVICE_STATE_REQUEST)
+                .buildAndExpand(param)
+                .toUri();
+
+        mockMvc.perform(put(putApproveDeviceStateRequestURI).contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNoContent())
+                .andDo(print());
+
+    }
+
+    @Test
+    void shouldNotApproveRequestBecauseNotFound() throws Exception {
+
+        doThrow(DeviceStateRequestNotFound.class).when(deviceApprovalRequestService).approveRequest(any(UUID.class));
+
+        Map<String, String> param = new HashMap<>();
+        param.put("approval-request-id", UUID.randomUUID().toString());
+
+        URI putApproveDeviceStateRequestURI = UriComponentsBuilder.fromPath(PUT_APPROVE_DEVICE_STATE_REQUEST)
+                .buildAndExpand(param)
+                .toUri();
+
+        mockMvc.perform(put(putApproveDeviceStateRequestURI).contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+
     }
 
 }
