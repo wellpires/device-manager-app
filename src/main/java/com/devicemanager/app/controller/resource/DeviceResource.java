@@ -3,12 +3,14 @@ package com.devicemanager.app.controller.resource;
 import com.devicemanager.app.dto.DeviceDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
 import com.devicemanager.app.dto.response.DeviceResponse;
+import com.devicemanager.app.dto.response.DeviceStateRequestResponse;
 import com.devicemanager.app.enums.StateEnum;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -77,5 +79,13 @@ public interface DeviceResource {
                                              required = true)
                                      StateEnum stateEnum);
 
+    @Operation(summary = "List Device State Requests")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Fetch device state requests"),
+            @ApiResponse(responseCode = "500", description = "Internal server error!")})
+    ResponseEntity<DeviceStateRequestResponse> listStatesRequests(@Parameter(name = "id",
+                                                                           example = "974ced59-46a6-4080-9025-597ea6cc4643",
+                                                                           description = "Device id",
+                                                                           required = true) UUID id);
 
 }
