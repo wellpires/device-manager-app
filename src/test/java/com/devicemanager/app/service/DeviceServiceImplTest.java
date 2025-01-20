@@ -1,11 +1,14 @@
 package com.devicemanager.app.service;
 
 import com.devicemanager.app.dto.DeviceDTO;
+import com.devicemanager.app.dto.DeviceStateDTO;
 import com.devicemanager.app.entity.DeviceEntity;
+import com.devicemanager.app.entity.DeviceStateEntity;
 import com.devicemanager.app.enums.StateEnum;
 import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
 import com.devicemanager.app.repository.DeviceRepository;
+import com.devicemanager.app.service.impl.DeviceServiceImpl;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,13 +42,24 @@ class DeviceServiceImplTest {
     @Mock
     private DeviceRepository deviceRepository;
 
+    @Mock
+    private DeviceStateService deviceStateService;
+
     @Captor
     private ArgumentCaptor<DeviceEntity> deviceEntityArgumentCaptor;
 
     @Test
     void shouldCreate() {
 
-        DeviceEntity deviceEntity = DeviceEntity.builder().id(UUID.randomUUID()).build();
+        DeviceStateDTO deviceStateDTO = DeviceStateDTO.builder()
+                .id(UUID.randomUUID())
+                .name(StateEnum.AVAILABLE)
+                .build();
+        when(deviceStateService.findByName(any(StateEnum.class))).thenReturn(deviceStateDTO);
+
+        DeviceEntity deviceEntity = DeviceEntity.builder()
+                .id(UUID.randomUUID())
+                .build();
         when(deviceRepository.save(any(DeviceEntity.class))).thenReturn(deviceEntity);
 
         DeviceDTO deviceDTO = DeviceDTO.builder()
@@ -62,10 +76,16 @@ class DeviceServiceImplTest {
 
         List<DeviceEntity> deviceEntities = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
+            DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                    .id(UUID.randomUUID())
+                    .state(StateEnum.AVAILABLE)
+                    .build();
+
             DeviceEntity deviceEntity = DeviceEntity.builder()
                     .id(UUID.randomUUID())
                     .name(RandomStringUtils.secure().nextAlphanumeric(10))
                     .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                    .deviceStateEntity(deviceStateEntity)
                     .build();
             deviceEntities.add(deviceEntity);
 
@@ -84,11 +104,18 @@ class DeviceServiceImplTest {
     @Test
     void shouldFindOneDevice() {
 
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .id(UUID.randomUUID())
+                .state(StateEnum.AVAILABLE)
+                .build();
+
         DeviceEntity deviceEntity = DeviceEntity.builder()
                 .id(UUID.randomUUID())
                 .name(RandomStringUtils.secure().nextAlphanumeric(10))
                 .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .deviceStateEntity(deviceStateEntity)
                 .build();
+
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
 
         DeviceDTO deviceDTO = deviceService.find(UUID.randomUUID());
@@ -113,10 +140,16 @@ class DeviceServiceImplTest {
     @Test
     void shouldDeleteDevice() {
 
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .id(UUID.randomUUID())
+                .state(StateEnum.AVAILABLE)
+                .build();
+
         DeviceEntity deviceEntity = DeviceEntity.builder()
                 .id(UUID.randomUUID())
                 .name(RandomStringUtils.secure().nextAlphanumeric(10))
                 .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .deviceStateEntity(deviceStateEntity)
                 .build();
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
 
@@ -142,11 +175,15 @@ class DeviceServiceImplTest {
     @Test
     void shouldNotDeleteDeviceBecauseDeviceIsInUse() {
 
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .state(StateEnum.IN_USE)
+                .build();
+
         DeviceEntity deviceEntity = DeviceEntity.builder()
                 .id(UUID.randomUUID())
                 .name(RandomStringUtils.secure().nextAlphanumeric(10))
                 .brand(RandomStringUtils.secure().nextAlphanumeric(10))
-                .state(StateEnum.IN_USE)
+                .deviceStateEntity(deviceStateEntity)
                 .build();
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
 
@@ -161,11 +198,17 @@ class DeviceServiceImplTest {
     @Test
     void shouldUpdateDevice() {
 
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .state(StateEnum.AVAILABLE)
+                .build();
+
         DeviceEntity deviceEntity = DeviceEntity.builder()
                 .id(UUID.randomUUID())
                 .name(RandomStringUtils.secure().nextAlphanumeric(10))
                 .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .deviceStateEntity(deviceStateEntity)
                 .build();
+
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
 
         DeviceDTO deviceDTO = DeviceDTO.builder()
@@ -199,11 +242,15 @@ class DeviceServiceImplTest {
     @Test
     void shouldNotUpdateDeviceBecauseDeviceIsInUse() {
 
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .state(StateEnum.IN_USE)
+                .build();
+
         DeviceEntity deviceEntity = DeviceEntity.builder()
                 .id(UUID.randomUUID())
                 .name(RandomStringUtils.secure().nextAlphanumeric(10))
                 .brand(RandomStringUtils.secure().nextAlphanumeric(10))
-                .state(StateEnum.IN_USE)
+                .deviceStateEntity(deviceStateEntity)
                 .build();
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
 
@@ -218,13 +265,25 @@ class DeviceServiceImplTest {
     @Test
     void shouldUpdateDeviceState() {
 
+        UUID deviceStateAvailableId = UUID.randomUUID();
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .id(deviceStateAvailableId)
+                .state(StateEnum.AVAILABLE)
+                .build();
+
         DeviceEntity deviceEntity = DeviceEntity.builder()
                 .id(UUID.randomUUID())
                 .name(RandomStringUtils.secure().nextAlphanumeric(10))
                 .brand(RandomStringUtils.secure().nextAlphanumeric(10))
-                .state(StateEnum.AVAILABLE)
+                .deviceStateEntity(deviceStateEntity)
                 .build();
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
+
+        DeviceStateDTO deviceStateDTO = DeviceStateDTO.builder()
+                .id(UUID.randomUUID())
+                .name(StateEnum.INACTIVE)
+                .build();
+        when(deviceStateService.findByName(any(StateEnum.class))).thenReturn(deviceStateDTO);
 
         deviceService.changeState(UUID.randomUUID(), StateEnum.INACTIVE);
 
@@ -232,7 +291,7 @@ class DeviceServiceImplTest {
         verify(deviceRepository).save(deviceEntityArgumentCaptor.capture());
 
         DeviceEntity deviceEntityCaught = deviceEntityArgumentCaptor.getValue();
-        assertThat(deviceEntityCaught.getState(), equalTo(StateEnum.INACTIVE));
+        assertThat(deviceEntityCaught.getDeviceStateEntity().getId(), equalTo(deviceStateAvailableId));
 
     }
 
@@ -242,6 +301,37 @@ class DeviceServiceImplTest {
         when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(DeviceNotFoundException.class, () -> {
+            deviceService.changeState(UUID.randomUUID(), StateEnum.INACTIVE);
+        });
+
+        verify(deviceRepository, never()).save(any(DeviceEntity.class));
+
+    }
+
+    @Test
+    void shouldNotUpdateDeviceStateBecauseDeviceIsInUsed() {
+
+        UUID deviceStateAvailableId = UUID.randomUUID();
+        DeviceStateEntity deviceStateEntity = DeviceStateEntity.builder()
+                .id(deviceStateAvailableId)
+                .state(StateEnum.IN_USE)
+                .build();
+
+        DeviceEntity deviceEntity = DeviceEntity.builder()
+                .id(UUID.randomUUID())
+                .name(RandomStringUtils.secure().nextAlphanumeric(10))
+                .brand(RandomStringUtils.secure().nextAlphanumeric(10))
+                .deviceStateEntity(deviceStateEntity)
+                .build();
+        when(deviceRepository.findById(any(UUID.class))).thenReturn(Optional.ofNullable(deviceEntity));
+
+        DeviceStateDTO deviceStateDTO = DeviceStateDTO.builder()
+                .id(UUID.randomUUID())
+                .name(StateEnum.INACTIVE)
+                .build();
+        when(deviceStateService.findByName(any(StateEnum.class))).thenReturn(deviceStateDTO);
+
+        assertThrows(DeviceInUseException.class, () -> {
             deviceService.changeState(UUID.randomUUID(), StateEnum.INACTIVE);
         });
 
