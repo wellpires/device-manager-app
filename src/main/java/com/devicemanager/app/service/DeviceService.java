@@ -23,4 +23,5 @@ public interface DeviceService {
 
     void changeState(UUID id, StateEnum stateEnum);
 
+    void changeState(UUID id, UUID stateId);
 }
