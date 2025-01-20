@@ -13,7 +13,7 @@ INSERT INTO dmn.device_states (id, name) VALUES ('d31e9707-7d94-4f31-8af5-fcdfd1
 
 CREATE TABLE dvc.device_approval_requests(
     id UUID DEFAULT gen_random_uuid(),
-    device_id UUID NOT NULL,
+    device_id UUID NOT NULL UNIQUE,
     state_id UUID NOT NULL,
     PRIMARY KEY(id),
     CONSTRAINT fk_device
