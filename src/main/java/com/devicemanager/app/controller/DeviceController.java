@@ -2,9 +2,12 @@ package com.devicemanager.app.controller;
 
 import com.devicemanager.app.controller.resource.DeviceResource;
 import com.devicemanager.app.dto.DeviceDTO;
+import com.devicemanager.app.dto.DeviceStateRequestDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
 import com.devicemanager.app.dto.response.DeviceResponse;
+import com.devicemanager.app.dto.response.DeviceStateRequestResponse;
 import com.devicemanager.app.enums.StateEnum;
+import com.devicemanager.app.service.DeviceApprovalRequestService;
 import com.devicemanager.app.service.DeviceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,6 +29,7 @@ import java.util.UUID;
 public class DeviceController implements DeviceResource {
 
     private final DeviceService deviceService;
+    private final DeviceApprovalRequestService deviceApprovalRequestService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Override
@@ -86,6 +91,15 @@ public class DeviceController implements DeviceResource {
         deviceService.changeState(id, stateEnum);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @GetMapping(path = "/{id}/approval-requests", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DeviceStateRequestResponse> listStatesRequests(@PathVariable("id") UUID id) {
+
+        List<DeviceStateRequestDTO> deviceStateRequestDTOs = deviceApprovalRequestService.listStatesRequests(id);
+
+        return ResponseEntity.ok(DeviceStateRequestResponse.builder().deviceStateRequestDTOs(deviceStateRequestDTOs).build());
     }
 
 }
