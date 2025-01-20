@@ -1,8 +1,10 @@
 package com.devicemanager.app.controller;
 
 import com.devicemanager.app.dto.DeviceDTO;
+import com.devicemanager.app.dto.DeviceStateDTO;
 import com.devicemanager.app.dto.DeviceStateRequestDTO;
 import com.devicemanager.app.dto.request.DeviceRequest;
+import com.devicemanager.app.dto.request.DeviceStateRequest;
 import com.devicemanager.app.enums.StateEnum;
 import com.devicemanager.app.exception.DeviceInUseException;
 import com.devicemanager.app.exception.DeviceNotFoundException;
@@ -47,6 +49,7 @@ class DeviceControllerTest {
     private static final String PATCH_UPDATE_DEVICE_STATE = BASE_URL.concat("/{id}/state/{state}");
     private static final String GET_DEVICE_STATE_REQUESTS = BASE_URL.concat("/{id}/approval-requests");
     private static final String PUT_APPROVE_DEVICE_STATE_REQUEST = BASE_URL.concat("/approval-requests/{approval-request-id}");
+    private static final String POST_CREATE_DEVICE_STATE_REQUEST = BASE_URL.concat("/{id}/approval-requests");
 
     @Autowired
     private ObjectMapper mapper;
@@ -417,6 +420,29 @@ class DeviceControllerTest {
 
         mockMvc.perform(put(putApproveDeviceStateRequestURI).contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    void shouldCreateApproveRequest() throws Exception {
+
+        DeviceStateDTO deviceStateDTO = DeviceStateDTO.builder()
+                .name(StateEnum.AVAILABLE)
+                .build();
+        DeviceStateRequest deviceStateRequest = DeviceStateRequest.builder()
+                .deviceStateDTO(deviceStateDTO)
+                .build();
+
+        Map<String, String> param = new HashMap<>();
+        param.put("id", UUID.randomUUID().toString());
+
+        URI postCreateDeviceStateRequest = UriComponentsBuilder.fromPath(POST_CREATE_DEVICE_STATE_REQUEST)
+                .buildAndExpand(param)
+                .toUri();
+
+        String jsonBody = mapper.writeValueAsString(deviceStateRequest);
+        mockMvc.perform(post(postCreateDeviceStateRequest).contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonBody))
+                .andExpect(status().isNoContent())
                 .andDo(print());
 
     }
