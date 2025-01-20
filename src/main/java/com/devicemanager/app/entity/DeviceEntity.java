@@ -1,6 +1,5 @@
 package com.devicemanager.app.entity;
 
-import com.devicemanager.app.enums.StateEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
